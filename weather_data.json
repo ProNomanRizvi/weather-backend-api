@@ -1,5 +1,93 @@
 [
     {
+        "id": 10,
+        "city": "Lahore",
+        "country": "PK",
+        "temperature": 42.88,
+        "humidity": 20,
+        "pressure": 993,
+        "wind_speed": 3.61,
+        "weather_condition": "Clear",
+        "created_at": "2026-07-10T12:47:13.161329"
+    },
+    {
+        "id": 9,
+        "city": "Islamabad",
+        "country": "PK",
+        "temperature": 25.5,
+        "humidity": 70,
+        "pressure": 1012,
+        "wind_speed": 2.8,
+        "weather_condition": "Clouds",
+        "created_at": "2026-07-10T12:47:11.598085"
+    },
+    {
+        "id": 8,
+        "city": "Karachi",
+        "country": "PK",
+        "temperature": 32.5,
+        "humidity": 60,
+        "pressure": 1008,
+        "wind_speed": 4.2,
+        "weather_condition": "Sunny",
+        "created_at": "2026-07-10T12:47:11.585504"
+    },
+    {
+        "id": 7,
+        "city": "Lahore",
+        "country": "PK",
+        "temperature": 32.5,
+        "humidity": 60,
+        "pressure": 1000,
+        "wind_speed": 4.2,
+        "weather_condition": "Clear",
+        "created_at": "2026-07-10T12:47:11.567461"
+    },
+    {
+        "id": 6,
+        "city": "Lahore",
+        "country": "PK",
+        "temperature": 32.76,
+        "humidity": 50,
+        "pressure": 999,
+        "wind_speed": 3.42,
+        "weather_condition": "Clear",
+        "created_at": "2026-07-10T03:34:08.718652"
+    },
+    {
+        "id": 5,
+        "city": "Islamabad",
+        "country": "PK",
+        "temperature": 25.5,
+        "humidity": 70,
+        "pressure": 1012,
+        "wind_speed": 2.8,
+        "weather_condition": "Clouds",
+        "created_at": "2026-07-10T03:32:03.961577"
+    },
+    {
+        "id": 4,
+        "city": "Karachi",
+        "country": "PK",
+        "temperature": 32.5,
+        "humidity": 60,
+        "pressure": 1008,
+        "wind_speed": 4.2,
+        "weather_condition": "Sunny",
+        "created_at": "2026-07-10T03:30:44.471887"
+    },
+    {
+        "id": 3,
+        "city": "Lahore",
+        "country": "PK",
+        "temperature": 32.5,
+        "humidity": 60,
+        "pressure": 1000,
+        "wind_speed": 4.2,
+        "weather_condition": "Clear",
+        "created_at": "2026-07-10T03:25:06.999910"
+    },
+    {
         "id": 2,
         "city": "Lahore",
         "country": "PK",
