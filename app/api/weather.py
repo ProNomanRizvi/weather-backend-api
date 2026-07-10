@@ -1,11 +1,11 @@
 """
 Weather API endpoints.
 
-This module contains endpoints responsible for creating
-and retrieving weather records.
+This module contains endpoints for creating and retrieving
+weather records stored in the database.
 """
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database.database import get_db
@@ -41,13 +41,64 @@ def create_weather(
         weather_condition=weather.weather_condition,
     )
 
-    # Add the new object to the current database session.
+    # Add the new record to the current session.
     db.add(weather_record)
 
-    # Persist the changes.
+    # Save changes to the database.
     db.commit()
 
-    # Refresh so auto-generated values (id, timestamps) are available.
+    # Reload the object so generated values are available.
     db.refresh(weather_record)
+
+    return weather_record
+
+
+@router.get(
+    "/",
+    response_model=list[WeatherResponse],
+    status_code=status.HTTP_200_OK,
+)
+def get_all_weather(
+    db: Session = Depends(get_db),
+):
+    """
+    Return all stored weather records.
+
+    The newest records are returned first.
+    """
+
+    weather_records = (
+        db.query(Weather)
+        .order_by(Weather.id.desc())
+        .all()
+    )
+
+    return weather_records
+
+
+@router.get(
+    "/{weather_id}",
+    response_model=WeatherResponse,
+    status_code=status.HTTP_200_OK,
+)
+def get_weather(
+    weather_id: int,
+    db: Session = Depends(get_db),
+):
+    """
+    Return a single weather record by its ID.
+    """
+
+    weather_record = (
+        db.query(Weather)
+        .filter(Weather.id == weather_id)
+        .first()
+    )
+
+    if weather_record is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Weather record not found.",
+        )
 
     return weather_record
