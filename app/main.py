@@ -8,6 +8,7 @@ registered from this file as the project grows.
 from fastapi import FastAPI
 from app.database.database import Base, engine
 from app.models.weather import Weather
+from app.api.weather import router as weather_router
 
 app = FastAPI(
     title="Weather Backend API",
@@ -18,6 +19,7 @@ app = FastAPI(
 # Create database tables during application startup.
 Base.metadata.create_all(bind=engine)
 
+app.include_router(weather_router)
 
 @app.get("/")
 def home():
