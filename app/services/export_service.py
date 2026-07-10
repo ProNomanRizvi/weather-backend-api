@@ -6,7 +6,9 @@ records into different file formats.
 """
 
 import csv
+import json
 
+from fastapi.responses import FileResponse
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
@@ -66,4 +68,58 @@ def export_weather_csv(
             "Content-Disposition":
                 "attachment; filename=weather_data.csv"
         },
+    )
+
+def export_weather_json(db):
+    """
+    Export all weather records as a JSON file.
+
+    This creates a temporary JSON file and returns it
+    as a downloadable response.
+    """
+
+    # Import here to avoid circular imports.
+    from app.models.weather import Weather
+
+    weather_records = (
+        db.query(Weather)
+        .order_by(Weather.id.desc())
+        .all()
+    )
+
+    weather_data = []
+
+    for record in weather_records:
+        weather_data.append(
+            {
+                "id": record.id,
+                "city": record.city,
+                "country": record.country,
+                "temperature": record.temperature,
+                "humidity": record.humidity,
+                "pressure": record.pressure,
+                "wind_speed": record.wind_speed,
+                "weather_condition": record.weather_condition,
+                "created_at": record.created_at.isoformat(),
+            }
+        )
+
+    filename = "weather_data.json"
+
+    # Write formatted JSON to disk.
+    with open(
+        filename,
+        "w",
+        encoding="utf-8",
+    ) as json_file:
+        json.dump(
+            weather_data,
+            json_file,
+            indent=4,
+        )
+
+    return FileResponse(
+        path=filename,
+        media_type="application/json",
+        filename=filename,
     )

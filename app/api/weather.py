@@ -24,7 +24,10 @@ from app.services.weather_crud import (
     update_weather as update_weather_record,
 )
 from app.services.weather_service import fetch_weather
-from app.services.export_service import export_weather_csv
+from app.services.export_service import (
+    export_weather_csv,
+    export_weather_json,
+)
 
 router = APIRouter(
     prefix="/weather",
@@ -77,6 +80,19 @@ def export_weather_csv_endpoint(
     """
 
     return export_weather_csv(db)
+
+@router.get(
+    "/export/json",
+    summary="Export weather records as JSON",
+)
+def export_weather_json_endpoint(
+    db: Session = Depends(get_db),
+):
+    """
+    Export all weather records as a JSON file.
+    """
+
+    return export_weather_json(db)
 
 @router.get(
     "/{weather_id}",
