@@ -10,11 +10,18 @@ from requests.exceptions import HTTPError
 from sqlalchemy.orm import Session
 
 from app.database.database import get_db
-from app.models.weather import Weather
 from app.schemas.weather import (
     WeatherCreate,
     WeatherResponse,
     WeatherUpdate,
+)
+from app.services.weather_crud import (
+    create_weather as create_weather_record,
+    create_weather_from_api,
+    delete_weather as delete_weather_record,
+    get_all_weather,
+    get_weather_by_id,
+    update_weather as update_weather_record,
 )
 from app.services.weather_service import fetch_weather
 
@@ -37,22 +44,10 @@ def create_weather(
     Save a new weather record.
     """
 
-    weather_record = Weather(
-        city=weather.city,
-        country=weather.country,
-        temperature=weather.temperature,
-        humidity=weather.humidity,
-        pressure=weather.pressure,
-        wind_speed=weather.wind_speed,
-        weather_condition=weather.weather_condition,
+    return create_weather_record(
+        db,
+        weather,
     )
-
-    # Store the new weather record.
-    db.add(weather_record)
-    db.commit()
-    db.refresh(weather_record)
-
-    return weather_record
 
 
 @router.get(
@@ -60,22 +55,14 @@ def create_weather(
     response_model=list[WeatherResponse],
     status_code=status.HTTP_200_OK,
 )
-def get_all_weather(
+def get_all_weather_endpoint(
     db: Session = Depends(get_db),
 ):
     """
-    Return all weather records.
-
-    Newest records appear first.
+    Return all stored weather records.
     """
 
-    weather_records = (
-        db.query(Weather)
-        .order_by(Weather.id.desc())
-        .all()
-    )
-
-    return weather_records
+    return get_all_weather(db)
 
 
 @router.get(
@@ -91,10 +78,9 @@ def get_weather(
     Return a weather record by its ID.
     """
 
-    weather_record = (
-        db.query(Weather)
-        .filter(Weather.id == weather_id)
-        .first()
+    weather_record = get_weather_by_id(
+        db,
+        weather_id,
     )
 
     if weather_record is None:
@@ -119,10 +105,9 @@ def update_weather(
     Update an existing weather record.
     """
 
-    weather_record = (
-        db.query(Weather)
-        .filter(Weather.id == weather_id)
-        .first()
+    weather_record = get_weather_by_id(
+        db,
+        weather_id,
     )
 
     if weather_record is None:
@@ -131,19 +116,11 @@ def update_weather(
             detail="Weather record not found.",
         )
 
-    # Update editable fields.
-    weather_record.city = weather.city
-    weather_record.country = weather.country
-    weather_record.temperature = weather.temperature
-    weather_record.humidity = weather.humidity
-    weather_record.pressure = weather.pressure
-    weather_record.wind_speed = weather.wind_speed
-    weather_record.weather_condition = weather.weather_condition
-
-    db.commit()
-    db.refresh(weather_record)
-
-    return weather_record
+    return update_weather_record(
+        db,
+        weather_record,
+        weather,
+    )
 
 
 @router.delete(
@@ -158,10 +135,9 @@ def delete_weather(
     Delete a weather record.
     """
 
-    weather_record = (
-        db.query(Weather)
-        .filter(Weather.id == weather_id)
-        .first()
+    weather_record = get_weather_by_id(
+        db,
+        weather_id,
     )
 
     if weather_record is None:
@@ -170,8 +146,10 @@ def delete_weather(
             detail="Weather record not found.",
         )
 
-    db.delete(weather_record)
-    db.commit()
+    delete_weather_record(
+        db,
+        weather_record,
+    )
 
     return None
 
@@ -186,8 +164,9 @@ def fetch_and_save_weather(
     db: Session = Depends(get_db),
 ):
     """
-    Fetch live weather data from OpenWeather,
-    save it to the database, and return the saved record.
+    Fetch live weather from OpenWeather,
+    save it to the database,
+    and return the stored record.
     """
 
     try:
@@ -199,12 +178,7 @@ def fetch_and_save_weather(
             detail=f"City '{city}' was not found.",
         )
 
-    # Create a Weather model using the returned dictionary.
-    weather_record = Weather(**weather_data)
-
-    # Save the fetched weather data.
-    db.add(weather_record)
-    db.commit()
-    db.refresh(weather_record)
-
-    return weather_record
+    return create_weather_from_api(
+        db,
+        weather_data,
+    )
