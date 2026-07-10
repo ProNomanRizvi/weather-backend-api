@@ -2,8 +2,7 @@
 Pydantic schemas for weather data.
 
 Schemas define what the API accepts from clients and
-what it returns in responses. They help validate input
-before it reaches the database.
+what it returns in responses.
 """
 
 from datetime import datetime
@@ -11,9 +10,9 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 
 
-class WeatherCreate(BaseModel):
+class WeatherBase(BaseModel):
     """
-    Data required to create a weather record.
+    Common weather fields shared by multiple schemas.
     """
 
     city: str
@@ -25,20 +24,28 @@ class WeatherCreate(BaseModel):
     weather_condition: str
 
 
-class WeatherResponse(BaseModel):
+class WeatherCreate(WeatherBase):
+    """
+    Data required to create a weather record.
+    """
+
+    pass
+
+
+class WeatherUpdate(WeatherBase):
+    """
+    Data required to update a weather record.
+    """
+
+    pass
+
+
+class WeatherResponse(WeatherBase):
     """
     Weather data returned by the API.
     """
 
     id: int
-    city: str
-    country: str
-    temperature: float
-    humidity: int
-    pressure: int
-    wind_speed: float
-    weather_condition: str
     created_at: datetime
 
-    # Allow Pydantic to read SQLAlchemy model objects.
     model_config = ConfigDict(from_attributes=True)
