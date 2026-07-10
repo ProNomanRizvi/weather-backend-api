@@ -9,12 +9,14 @@ from fastapi import FastAPI
 from app.database.database import Base, engine
 from app.models.weather import Weather
 from app.api.weather import router as weather_router
+from app.exceptions.handlers import register_exception_handlers
 
 app = FastAPI(
     title="Weather Backend API",
-    description="Backend service for managing and retrieving weather data.",
     version="1.0.0",
 )
+
+register_exception_handlers(app)
 
 # Create database tables during application startup.
 Base.metadata.create_all(bind=engine)
