@@ -2,15 +2,9 @@
 Tests for weather API endpoints.
 """
 
-from fastapi.testclient import TestClient
 import json
-from app.main import app
 
-# Test client used to make HTTP requests.
-client = TestClient(app)
-
-
-def test_create_weather():
+def test_create_weather(client):
     """
     Verify a weather record can be created.
     """
@@ -46,7 +40,7 @@ def test_create_weather():
     assert "id" in data
     assert "created_at" in data
 
-def test_get_all_weather():
+def test_get_all_weather(client):
     """
     Verify all weather records can be retrieved.
     """
@@ -75,7 +69,7 @@ def test_get_all_weather():
     assert "weather_condition" in first_record
     assert "created_at" in first_record
 
-def test_get_weather_by_id():
+def test_get_weather_by_id(client):
     # Create a weather record
     response = client.post(
         "/weather/",
@@ -103,7 +97,7 @@ def test_get_weather_by_id():
     assert data["city"] == "Karachi"
     assert data["country"] == "PK"
 
-def test_update_weather():
+def test_update_weather(client):
     """
     Verify an existing weather record can be updated.
     """
@@ -154,7 +148,7 @@ def test_update_weather():
     assert data["wind_speed"] == 2.8
     assert data["weather_condition"] == "Clouds"
 
-def test_delete_weather():
+def test_delete_weather(client):
     """
     Verify a weather record can be deleted.
     """
@@ -193,7 +187,7 @@ def test_delete_weather():
 
     assert data["message"] == "Weather record not found."
 
-def test_fetch_and_save_weather():
+def test_fetch_and_save_weather(client):
     """
     Verify live weather data can be fetched
     and stored in the database.
@@ -219,7 +213,7 @@ def test_fetch_and_save_weather():
     assert "id" in data
     assert "created_at" in data
 
-def test_export_weather_csv():
+def test_export_weather_csv(client):
     """
     Verify weather records can be exported as a CSV file.
     """
@@ -243,7 +237,7 @@ def test_export_weather_csv():
     assert "Country" in content
     assert "Temperature" in content
 
-def test_export_weather_json():
+def test_export_weather_json(client):
     """
     Verify weather records can be exported as a JSON file.
     """
@@ -282,7 +276,7 @@ def test_export_weather_json():
         assert "weather_condition" in weather
         assert "created_at" in weather
 
-def test_weather_not_found():
+def test_weather_not_found(client):
     """
     Verify requesting a non-existent weather record
     returns a 404 response.
@@ -297,3 +291,4 @@ def test_weather_not_found():
     assert data["success"] is False
     assert data["status_code"] == 404
     assert data["message"] == "Weather record not found."
+

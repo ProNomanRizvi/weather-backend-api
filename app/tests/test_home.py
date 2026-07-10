@@ -2,15 +2,8 @@
 Tests for the application's home endpoint.
 """
 
-from fastapi.testclient import TestClient
 
-from app.main import app
-
-# Create a test client for the FastAPI application.
-client = TestClient(app)
-
-
-def test_home():
+def test_home(client):
     """
     Verify the home endpoint is reachable.
     """
