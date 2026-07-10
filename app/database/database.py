@@ -1,42 +1,56 @@
 """
-Database configuration.
+Database configuration for the Weather Backend API.
 
-This module creates the database engine and session factory.
-Keeping everything here makes it easy to switch databases later
-without touching the rest of the project.
+This module is responsible for:
+
+- Creating the SQLite database connection
+- Creating the SQLAlchemy engine
+- Creating database sessions
+- Providing the Base class for all models
+
+Keeping database-related code in one place makes the project
+cleaner and allows us to switch to another database (like PostgreSQL)
+with minimal changes.
 """
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
+# SQLite database file.
+# The file will be created automatically if it doesn't exist.
 DATABASE_URL = "sqlite:///weather.db"
 
+# Create the SQLAlchemy engine.
+# 'check_same_thread=False' allows SQLite to work correctly with FastAPI.
 engine = create_engine(
     DATABASE_URL,
     connect_args={"check_same_thread": False},
 )
 
+# Create a session factory.
+# Every request will use its own database session.
 SessionLocal = sessionmaker(
+    bind=engine,
     autoflush=False,
     autocommit=False,
-    bind=engine,
 )
 
 
 class Base(DeclarativeBase):
     """
-    Base class that every database model will inherit.
+    Base class for all database models.
+
+    Every model (Weather, User, etc.) will inherit from this class.
     """
     pass
 
 
 def get_db():
     """
-    Provide a database session for each request.
+    Yield a database session.
 
-    The session is always closed after the request finishes,
-    even if an exception occurs.
+    FastAPI automatically closes the session after the request
+    finishes, even if an exception occurs.
     """
     db = SessionLocal()
 

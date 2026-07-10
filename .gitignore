@@ -9,6 +9,7 @@ __pycache__/
 .env
 
 # SQLite database
+weather.db
 *.db
 
 # VS Code
