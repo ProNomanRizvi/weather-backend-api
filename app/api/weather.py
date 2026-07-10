@@ -2,10 +2,11 @@
 Weather API endpoints.
 
 This module contains endpoints for creating, retrieving,
-updating, and deleting weather records.
+updating, deleting, and fetching live weather data.
 """
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from requests.exceptions import HTTPError
 from sqlalchemy.orm import Session
 
 from app.database.database import get_db
@@ -15,6 +16,7 @@ from app.schemas.weather import (
     WeatherResponse,
     WeatherUpdate,
 )
+from app.services.weather_service import fetch_weather
 
 router = APIRouter(
     prefix="/weather",
@@ -45,13 +47,9 @@ def create_weather(
         weather_condition=weather.weather_condition,
     )
 
-    # Add the new record to the current session.
+    # Store the new weather record.
     db.add(weather_record)
-
-    # Save changes to the database.
     db.commit()
-
-    # Refresh the object so generated values are available.
     db.refresh(weather_record)
 
     return weather_record
@@ -66,9 +64,9 @@ def get_all_weather(
     db: Session = Depends(get_db),
 ):
     """
-    Return all stored weather records.
+    Return all weather records.
 
-    The newest records appear first.
+    Newest records appear first.
     """
 
     weather_records = (
@@ -90,7 +88,7 @@ def get_weather(
     db: Session = Depends(get_db),
 ):
     """
-    Return a single weather record by its ID.
+    Return a weather record by its ID.
     """
 
     weather_record = (
@@ -176,3 +174,37 @@ def delete_weather(
     db.commit()
 
     return None
+
+
+@router.post(
+    "/fetch/{city}",
+    response_model=WeatherResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def fetch_and_save_weather(
+    city: str,
+    db: Session = Depends(get_db),
+):
+    """
+    Fetch live weather data from OpenWeather,
+    save it to the database, and return the saved record.
+    """
+
+    try:
+        weather_data = fetch_weather(city)
+
+    except HTTPError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"City '{city}' was not found.",
+        )
+
+    # Create a Weather model using the returned dictionary.
+    weather_record = Weather(**weather_data)
+
+    # Save the fetched weather data.
+    db.add(weather_record)
+    db.commit()
+    db.refresh(weather_record)
+
+    return weather_record

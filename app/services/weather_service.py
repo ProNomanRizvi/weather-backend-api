@@ -6,7 +6,6 @@ Keeping API calls here keeps endpoint logic clean.
 """
 
 import os
-
 import requests
 from dotenv import load_dotenv
 
@@ -16,9 +15,9 @@ API_KEY = os.getenv("OPENWEATHER_API_KEY")
 BASE_URL = os.getenv("OPENWEATHER_BASE_URL")
 
 
-def fetch_weather(city: str):
+def fetch_weather(city: str) -> dict:
     """
-    Fetch current weather for the given city.
+    Fetch current weather data from OpenWeather.
     """
 
     params = {
@@ -35,4 +34,14 @@ def fetch_weather(city: str):
 
     response.raise_for_status()
 
-    return response.json()
+    data = response.json()
+
+    return {
+        "city": data["name"],
+        "country": data["sys"]["country"],
+        "temperature": data["main"]["temp"],
+        "humidity": data["main"]["humidity"],
+        "pressure": data["main"]["pressure"],
+        "wind_speed": data["wind"]["speed"],
+        "weather_condition": data["weather"][0]["main"],
+    }
